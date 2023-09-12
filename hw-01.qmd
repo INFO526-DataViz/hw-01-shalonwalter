@@ -1,26 +1,282 @@
 ---
 title: "HW 01"
-author: "INSERT YOUR NAME HERE"
+author: "Shalon Walter"
 format: html
 toc: true
 ---
 
 ## 1 - Road traffic accidents in Edinburgh
 
-```{r label-me-1}
+```{r Q1}
+
+#install.packages("dplyr")
+library(dplyr)
+library(ggplot2)
+
+accidents_transformed <- accidents %>%
+  mutate(
+    weekday_indicator = case_when(
+      day_of_week %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "Weekday",
+      TRUE ~ "Weekend"
+    )
+  )
+severity_colors <- c("Fatal" = "purple", "Serious" = "lightblue", "Slight" = "yellow")
+ggplot(accidents_transformed, aes(x = time, fill = severity)) +
+  geom_density(alpha = 0.5) +
+  labs(
+    title = "Number of accidents throughout the day\nBy day of week and severity",
+    x = "Time of the day",
+    y = "Density"
+  ) +
+  scale_fill_manual(values = severity_colors) +
+  facet_wrap(~weekday_indicator, ncol = 1) + 
+  theme_minimal()
+
 
 ```
-
+The 2 plots for weekday and weekends allows us to compare the patterns and we can see that during weekdays there are fatal accidents compared to the weekend. From the plot we can also interpret the peak times when the accidents happened for both the plots was around 4pm. 
 ## 2 - NYC marathon winners
 
-```{r label-me-2}
+```{r Q2a}
+# Load the required package and data
+library(openintro)
+data(nyc_marathon)
+head(nyc_marathon)
+
+# Histogram
+hist(nyc_marathon$time_hrs,
+     breaks = 30,
+     main="Histogram distribution of NYC Marathon Times",
+     col="lightpink",
+     xlab="Time (hrs)")
+
+# Boxplot
+boxplot(nyc_marathon$time_hrs, 
+        main="Boxplot Distribution of NYC Marathon Times", 
+        col="lightblue",
+        ylab="Time (hrs)")
 
 ```
 
+Features apparent to histogram are that it shows frequency distribution that helps to show the shape of distribution
+Features apparent to boxplot are that it shows the summary of the data's quartiles which helps us to quickly identify outliers and the spread of data. 
+
+```{r Q2b}
+
+library(ggplot2)
+ggplot(nyc_marathon, aes(x = division, y = time_hrs, fill = division)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("lightblue", "purple")) +
+  ggtitle("Boxplot Distribution of NYC Marathon Times by Gender") +
+  xlab("Gender") +
+  ylab("Time (hrs)") +
+  theme_minimal()
+
+```
+On comparison the marathon times between men and women we can see that women have taken more time then men. 
+
+```{r Q2c}
+
+ggplot(nyc_marathon, aes(x = division, y = time_hrs)) +
+  geom_boxplot() +
+  ggtitle("Boxplot Distribution of NYC Marathon Times by Gender") +
+  xlab("Gender") +
+  ylab("Time (hrs)") +
+  theme_minimal() 
+  
+```
+Removing the colour which is not necessarily providing useful information. Removing such redundant elements increases the data-to-ink ratio, making the plot easier to read and interpret by focusing more on the data and less on non-essential decorations.
+
+```{r Q2d}
+
+library(ggplot2)
+ggplot(nyc_marathon, aes(x = year, y = time_hrs, color = division, shape = division)) +
+  geom_point() +
+  geom_line() +
+  scale_color_manual(values = c("blue", "pink")) +
+  ggtitle("NYC Marathon Times Over the Years Categorised by Gender") +
+  xlab("Years") +
+  ylab("Time (hrs)")+
+  theme_minimal()
+
+
+```
+In this plot we can see the trend of marathon times for both men and women over the years and that is not visible in all the other plots.
 ## 3 - US counties
+```{r Q3a}
+library(openintro)
+data("county")
+head(county)
+ggplot(county) +
+  geom_point(aes(x = median_edu, y = median_hh_income)) +
+  geom_boxplot(aes(x = smoking_ban, y = pop2017))
+```
 
+The code tries to create a ggplot2 plotusing the data from "county" dataset and it tries to plots two geoms on the same plot 
+geom_point plots points with x = median_edu and y = median_hh_income, which should show the relationship between median education and median household income.
+geom_boxplot tries to create boxplots with x = smoking_ban and y = pop2017, presumably to show the distribution of populations in 2017 across different levels of smoking bans.
+2 problems for the code are the code is missing aes for aesthetics and it is not meaningful to plot both the plots together, can lead to a confusing visualisation. 
 
+```{r Q3b}
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(median_edu ~ .)
+
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(. ~ median_edu)
+
+```
+The first plot uses facet_grid(median_edu ~ .), which places facets vertically in rows. It allows you to compare poverty levels for different median education levels in a vertical manner.
+The second plot uses facet_grid(. ~ median_edu), which places facets horizontally in columns. It allows you to compare poverty levels for different median education levels in a horizontal manner.
+Generally horizontal facets are easier for comparing levels and personally I think the second plot is easier to compare and it shows that the orientation can imapct the interpretability and effectiveness of visualising data  
+```{r Q3c}
+com_mapping <- ggplot(county, aes(x = homeownership, y = poverty)) #common mapping for all plots
+
+plot_A <- com_mapping +
+  geom_point() +
+  labs(title = "Plot A") 
+
+plot_B <- com_mapping +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(title = "Plot B") 
+
+plot_C <- com_mapping +
+  geom_point(color = "black") +
+  geom_smooth(aes(group = metro), color = "green", se = FALSE) +
+  labs(title = "Plot C") +
+  guides(color = "none") 
+
+plot_D <- com_mapping +
+  geom_smooth(aes(group = metro), se = FALSE) +
+  labs(title = "Plot D") +
+  geom_point() 
+
+plot_E <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(se = FALSE, aes(linetype = metro, group = metro)) +
+  labs(title = "Plot E") 
+
+plot_F <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(aes(group = metro, color = metro), se = FALSE) +
+  labs(title = "Plot F") 
+
+plot_G <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(se = FALSE, aes(group = 1)) +
+  labs(title = "Plot G") 
+  
+
+plot_H <- com_mapping +
+  geom_point(aes(color = metro)) +
+  labs(title = "Plot H") 
+
+print(plot_A)
+print(plot_B)
+print(plot_C)
+print(plot_D)
+print(plot_E)
+print(plot_F)
+print(plot_G)
+print(plot_H)
+```
 ## 4 - Rental apartments in SF
 
+```{r Q4}
+# Load libraries and data
+library(tidyverse)
+rent <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv")
+print(rent)
+# Filter for San Francisco and full units only
+rent_sanfran <- rent %>% 
+  filter(city == "san francisco", room_in_apt == 0)
+print(rent_sanfran)
+# Find top 7 neighborhoods
+top_nhoods <- rent_sanfran %>%
+  count(nhood) %>%
+  top_n(7) %>%
+  pull(nhood)
+print(top_nhoods)
+# Label other neighborhoods as "Other"
+rent_sanfran <- rent_sanfran %>%
+  mutate(nhood = if_else(nhood %in% top_nhoods, nhood, "Other"))
+# Summarize data to find the range of rent prices
+summary_data <- rent_sanfran %>%
+  group_by(year, beds, nhood) %>%
+  summarise(
+    min_price = min(price, na.rm = TRUE),
+    max_price = max(price, na.rm = TRUE)
+  )
+
+# Plot the data
+ggplot(summary_data, aes(x = year, y = min_price)) +
+  geom_area(aes(fill = as.factor(beds), group = interaction(nhood, beds)), alpha = 0.5, position = 'dodge') +
+  facet_wrap(~ nhood, scales = "free_y", ncol = 4) +
+  labs(title = "Rental Prices in San Francisco Over Time by Neighborhood",
+       x = "Year",
+       y = "Rental Price ($)",
+       fill = "Number of Bedrooms") +
+  theme_minimal()
+
+
+```
+In the visualization, an area plot is used to clearly showcase rental price trends over time, while a facet wrap allows for easy comparisons between different San Francisco neighborhoods. The dodge position accommodates different bedroom categories within each neighborhood and year, transparency helps in distinguishing overlapping areas, and free Y-axis scales adjust for better detail in each subplot. The plot aims to interpret the variability in minimum prices, trends over time, neighborhood affordability, and the impact of the number of bedrooms on rent. For further improvement, it's suggested to add max prices, confidence intervals, and interactivity for a better understanding. 
+From the plots we can see that there is a spike in prices during the year 2010 and then the prices come down towards 2015 
 
 ## 5 - Napoleon’s march.
+
+```{r Q5}
+#install.packages("pander")
+#install.packages("ggmap")
+library(tidyverse)
+library(lubridate)
+library(ggmap)
+library(ggrepel)
+library(gridExtra)
+library(pander)
+napoleon_data <- readRDS("/Users/shalonwalter/hw-01-shalonwalter/data/napoleon.rds")
+print(napoleon_data)
+cities <- napoleon_data$cities
+troops <- napoleon_data$troops
+temps <- napoleon_data$temps
+if (is.character(temps$date)) {
+  temps <- temps %>% mutate(date = dmy(date))
+}
+troops %>% head() %>% pandoc.table(style = "rmarkdown")
+ggplot(troops, aes(x = long, y = lat, group = group)) +
+  geom_path()
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path()
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round")
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round") +
+  scale_size(range = c(0.5, 15))
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round") +
+  scale_size(range = c(0.5, 15)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+ggplot() +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat)) +
+  geom_text(data = cities, aes(x = long, y = lat, label = city), vjust = 1.5) +
+  scale_size(range = c(0.5, 15)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+
+```
+The series of ggplot commands create various plots that show the path of Napoleon's troops, indicated by longitude and latitude. The plots evolve from simple path charts to more detailed versions, adding attributes like troop direction and number of survivors as colors and sizes. The visualizations also include customization in color schemes, line styles, and the removal of default labels and guides. Ultimately, the final plot combines troop movements with city locations, labeled with city names, providing a comprehensive view of the campaign.
+
+Citations: Q5: The code was referenced from https://github.com/andrewheiss/fancy-minard.git
+Q4: geom_area referred from https://r-charts.com/evolution/area-chart-ggplot2/ 
