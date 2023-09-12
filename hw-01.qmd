@@ -1,7 +1,9 @@
 ---
 title: "HW 01"
 author: "Shalon Walter"
-format: html
+format: 
+  html:
+    embed-resources: true
 toc: true
 ---
 ```{r PAT}
