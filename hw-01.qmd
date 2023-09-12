@@ -15,6 +15,8 @@ library(dsbox)
 library(dplyr)
 library(ggplot2)
 
+# Splitting the dataset by weekdays and weekends
+
 accidents_transformed <- accidents %>%
   mutate(
     weekday_indicator = case_when(
@@ -23,6 +25,9 @@ accidents_transformed <- accidents %>%
     )
   )
 severity_colors <- c("Fatal" = "purple", "Serious" = "lightblue", "Slight" = "yellow")
+
+#Plotting the number of accidents 
+
 ggplot(accidents_transformed, aes(x = time, fill = severity)) +
   geom_density(alpha = 0.5) +
   labs(
@@ -65,6 +70,8 @@ Features apparent to boxplot are that it shows the summary of the data's quartil
 
 ```{r Q2b}
 
+# Plotting boxplots by gender/division
+
 library(ggplot2)
 ggplot(nyc_marathon, aes(x = division, y = time_hrs, fill = division)) +
   geom_boxplot() +
@@ -79,6 +86,8 @@ On comparison the marathon times between men and women we can see that women hav
 
 ```{r Q2c}
 
+# Removing redundancy
+
 ggplot(nyc_marathon, aes(x = division, y = time_hrs)) +
   geom_boxplot() +
   ggtitle("Boxplot Distribution of NYC Marathon Times by Gender") +
@@ -90,6 +99,8 @@ ggplot(nyc_marathon, aes(x = division, y = time_hrs)) +
 Removing the colour which is not necessarily providing useful information. Removing such redundant elements increases the data-to-ink ratio, making the plot easier to read and interpret by focusing more on the data and less on non-essential decorations.
 
 ```{r Q2d}
+
+# Plotting trend over the years 
 
 library(ggplot2)
 ggplot(nyc_marathon, aes(x = year, y = time_hrs, color = division, shape = division)) +
@@ -133,7 +144,9 @@ The first plot uses facet_grid(median_edu ~ .), which places facets vertically i
 The second plot uses facet_grid(. ~ median_edu), which places facets horizontally in columns. It allows you to compare poverty levels for different median education levels in a horizontal manner.
 Generally horizontal facets are easier for comparing levels and personally I think the second plot is easier to compare and it shows that the orientation can imapct the interpretability and effectiveness of visualising data  
 ```{r Q3c}
-com_mapping <- ggplot(county, aes(x = homeownership, y = poverty)) #common mapping for all plots
+# Common mapping for all plots
+com_mapping <- ggplot(county, aes(x = homeownership, y = poverty)) 
+
 
 plot_A <- com_mapping +
   geom_point() +
