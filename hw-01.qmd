@@ -15,8 +15,8 @@ remotes::install_github("rstudio-education/dsbox")
 ```{r Q1}
 
 #install.packages("dplyr")
-remotes::install_github("rstudio-education/dsbox")
-library(dsbox)
+#remotes::install_github("rstudio-education/dsbox") NOTE: Greg made this change
+#library(dsbox)
 library(dplyr)
 library(ggplot2)
 
