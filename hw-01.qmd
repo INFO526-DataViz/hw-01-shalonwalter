@@ -4,7 +4,10 @@ author: "Shalon Walter"
 format: html
 toc: true
 ---
-
+```{r PAT}
+Sys.setenv(GITHUB_PAT = "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")
+remotes::install_github("rstudio-education/dsbox")
+```
 ## 1 - Road traffic accidents in Edinburgh
 
 ```{r Q1}
@@ -296,7 +299,7 @@ The series of ggplot commands create various plots that show the path of Napoleo
 Citations: Q5: The code was referenced from https://github.com/andrewheiss/fancy-minard.git
 Q4: geom_area referred from https://r-charts.com/evolution/area-chart-ggplot2/ 
 
-```{r}
+```{r To Render}
 #install.packages("quarto")
 quarto::quarto_render("hw-01.qmd")
 
