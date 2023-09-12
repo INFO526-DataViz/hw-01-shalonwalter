@@ -6,10 +6,7 @@ format:
     embed-resources: true
 toc: true
 ---
-```{r PAT}
-Sys.setenv(GITHUB_PAT = "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")
-remotes::install_github("rstudio-education/dsbox")
-```
+
 ## 1 - Road traffic accidents in Edinburgh
 
 ```{r Q1}
