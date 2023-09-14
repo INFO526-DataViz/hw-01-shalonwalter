@@ -17,6 +17,8 @@ toc: true
 library(dplyr)
 library(ggplot2)
 
+accidents <- dsbox::accidents
+
 # Splitting the dataset by weekdays and weekends
 
 accidents_transformed <- accidents %>%
