@@ -303,6 +303,6 @@ Q4: geom_area referred from https://r-charts.com/evolution/area-chart-ggplot2/
 
 ```{r To Render}
 #install.packages("quarto")
-quarto::quarto_render("hw-01.qmd")
+#quarto::quarto_render("hw-01.qmd")
 
 ```
