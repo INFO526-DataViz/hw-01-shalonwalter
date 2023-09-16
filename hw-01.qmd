@@ -255,6 +255,7 @@ library(ggmap)
 library(ggrepel)
 library(gridExtra)
 library(pander)
+library(here)
 napoleon_data <- readRDS(here("data", "napoleon.rds"))
 print(napoleon_data)
 cities <- napoleon_data$cities
