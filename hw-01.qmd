@@ -68,7 +68,24 @@ boxplot(nyc_marathon$time_hrs,
         ylab="Time (hrs)")
 
 ```
+```{r 2a (updated, used ggplot for the visualisation)}
+# Load the required package and data
+library(openintro)
+library(ggplot2)
+data(nyc_marathon)
 
+# Histogram using ggplot2 with black outline for bins
+ggplot(nyc_marathon, aes(x=time_hrs)) + 
+  geom_histogram(bins=30, fill="lightpink", color="black") + 
+  labs(title="Histogram distribution of NYC Marathon Times", x="Time (hrs)", y="Frequency")
+
+# Boxplot using ggplot2 with a smaller width
+ggplot(nyc_marathon, aes(y=time_hrs)) + 
+  geom_boxplot(fill="lightblue", width=0.5) + 
+  labs(title="Boxplot Distribution of NYC Marathon Times", y="Time (hrs)")
+
+
+```
 Features apparent to histogram are that it shows frequency distribution that helps to show the shape of distribution
 Features apparent to boxplot are that it shows the summary of the data's quartiles which helps us to quickly identify outliers and the spread of data. 
 
@@ -88,6 +105,9 @@ ggplot(nyc_marathon, aes(x = division, y = time_hrs, fill = division)) +
 ```
 On comparison the marathon times between men and women we can see that women have taken more time then men. 
 
+Updated narrative
+The comparison of the marathon times for men and women using side-by-side boxplots efficiently highlights differences in central tendency, spread, and outliers. Women's slower timings and broader IQR compared to men's suggest slower times and more variation. The color coding enhances visualization, efficiently differentiating the gender groups. This visualization provides a quick yet thorough comparison of the performance between genders at the NYC Marathon by showing that women, on average, display more time variation and overall take longer to complete the marathon.
+
 ```{r Q2c}
 
 # Removing redundancy
@@ -100,7 +120,23 @@ ggplot(nyc_marathon, aes(x = division, y = time_hrs)) +
   theme_minimal() 
   
 ```
+```{r 2c updated}
+# Removing redundancy (Removing the legend but the color is retained)
+ggplot(nyc_marathon, aes(x = division, y = time_hrs, fill = division)) +
+  geom_boxplot() +
+  ggtitle("Boxplot Distribution of NYC Marathon Times by Gender") +
+  xlab("Gender") +
+  ylab("Time (hrs)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
 Removing the colour which is not necessarily providing useful information. Removing such redundant elements increases the data-to-ink ratio, making the plot easier to read and interpret by focusing more on the data and less on non-essential decorations.
+
+(Updated narrative)
+
+Retaining the color for each boxplot enhances the distinction between the two gender groups, thereby maintaining the plot’s effectiveness and visualization. The removal of the legend, on the other hand, reduces redundancy since the x-axis labels already convey the gender information, hence improving the data-to-ink ratio. However, it is important to balance the data-to-ink ratio and the plot’s interpretability; the color, in this instance, serves a functional purpose in swiftly differentiating the groups, demonstrating that a thoughtful application of ink can indeed enhance the data’s readability and interpretation.
 
 ```{r Q2d}
 
@@ -201,6 +237,60 @@ print(plot_F)
 print(plot_G)
 print(plot_H)
 ```
+```{r 3c updated}
+
+install.packages("gridExtra")
+library(gridExtra)
+# Common mapping for all plots
+com_mapping <- ggplot(county, aes(x = homeownership, y = poverty)) 
+
+
+plot_A <- com_mapping +
+  geom_point() +
+  labs(title = "Plot A") 
+
+plot_B <- com_mapping +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(title = "Plot B") 
+
+plot_C <- com_mapping +
+  geom_point(color = "black") +
+  geom_smooth(aes(group = metro), color = "green", se = FALSE) +
+  labs(title = "Plot C") +
+  guides(color = "none") 
+
+plot_D <- com_mapping +
+  geom_smooth(aes(group = metro), se = FALSE) +
+  labs(title = "Plot D") +
+  geom_point() 
+
+plot_E <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(se = FALSE, aes(linetype = metro, group = metro)) +
+  labs(title = "Plot E") 
+
+plot_F <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(aes(group = metro, color = metro), se = FALSE) +
+  labs(title = "Plot F") 
+
+plot_G <- com_mapping +
+  geom_point(aes(color = metro)) +
+  geom_smooth(se = FALSE, aes(group = 1)) +
+  labs(title = "Plot G") 
+  
+
+plot_H <- com_mapping +
+  geom_point(aes(color = metro)) +
+  labs(title = "Plot H") 
+
+# Arrange the plots in a grid using grid.arrange()
+grid.arrange(plot_A, plot_B, plot_C, plot_D, plot_E, plot_F, plot_G, plot_H, ncol = 2)
+
+```
+
+
 ## 4 - Rental apartments in SF
 
 ```{r Q4}
@@ -241,6 +331,51 @@ ggplot(summary_data, aes(x = year, y = min_price)) +
 
 
 ```
+```{r Q4 updated}
+# Load libraries and data
+library(tidyverse)
+rent <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-07-05/rent.csv")
+
+# Filter for San Francisco and full units only
+rent_sanfran <- rent %>% 
+  filter(city == "san francisco", room_in_apt == 0)
+
+# Find top 7 neighborhoods
+top_nhoods <- rent_sanfran %>%
+  count(nhood) %>%
+  top_n(7) %>%
+  pull(nhood)
+
+# Label other neighborhoods as "Other"
+rent_sanfran <- rent_sanfran %>%
+  mutate(nhood = if_else(nhood %in% top_nhoods, nhood, "Other"))
+
+# Summarize data to find the range of rent prices
+summary_data <- rent_sanfran %>%
+  group_by(year, beds, nhood) %>%
+  summarise(
+    min_price = min(price, na.rm = TRUE),
+    max_price = max(price, na.rm = TRUE)
+  )
+
+# Plot the data
+p <- ggplot(summary_data, aes(x = year, y = min_price)) +
+  geom_area(aes(fill = as.factor(beds), group = interaction(nhood, beds)), alpha = 0.5, position = 'dodge') +
+  facet_wrap(~ nhood, scales = "free_y", ncol = 4) +
+  labs(title = "Rental Prices in San Francisco Over Time by Neighborhood",
+       x = "Year",
+       y = "Rental Price ($)",
+       fill = "Number of Bedrooms") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# To change the width of the plot, you can use the options() function
+options(repr.plot.width = 15, repr.plot.height = 8)
+
+print(p)
+
+```
+
 In the visualization, an area plot is used to clearly showcase rental price trends over time, while a facet wrap allows for easy comparisons between different San Francisco neighborhoods. The dodge position accommodates different bedroom categories within each neighborhood and year, transparency helps in distinguishing overlapping areas, and free Y-axis scales adjust for better detail in each subplot. The plot aims to interpret the variability in minimum prices, trends over time, neighborhood affordability, and the impact of the number of bedrooms on rent. For further improvement, it's suggested to add max prices, confidence intervals, and interactivity for a better understanding. 
 From the plots we can see that there is a spike in prices during the year 2010 and then the prices come down towards 2015 
 
@@ -284,7 +419,7 @@ ggplot(troops, aes(x = long, y = lat, group = group,
   scale_colour_manual(values = c("#DFC17E", "#252523")) +
   labs(x = NULL, y = NULL) + 
   guides(color = FALSE, size = FALSE)
-ggplot() +
+main_plot <- ggplot() +
   geom_path(data = troops, aes(x = long, y = lat, group = group, 
                                color = direction, size = survivors),
             lineend = "round") +
@@ -295,7 +430,182 @@ ggplot() +
   labs(x = NULL, y = NULL) + 
   guides(color = FALSE, size = FALSE)
 
+
 ```
+
+ 
+
+```
+ggplot(data = temps, aes(x = long, y = temp)) +
+  geom_line() +
+  geom_text(aes(label = temp), vjust = 1.5)
+ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range
+temps.nice <- temps %>%
+  mutate(nice.label = paste0(temp, "°, ", month, ". ", day))
+
+temps.1812.plot <- ggplot(data = temps.nice, aes(x = long, y = temp)) +
+  geom_line() +
+  geom_label(aes(label = nice.label), size = 2.5) + 
+  labs(x = NULL, y = "° Celsius") +
+  scale_x_continuous(limits = ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range) +
+  scale_y_continuous(position = "right") +
+  coord_cartesian(ylim = c(-35, 5)) +  # Add some space above/below
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_blank(), axis.ticks = element_blank(),
+        panel.border = element_blank())
+
+temps.1812.plot
+example.data <- data_frame(x = 1:10, y = rnorm(10))
+
+plot1 <- ggplot(example.data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(y = "This is a really\nreally really really\nreally tall label")
+
+plot2 <- ggplot(example.data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(y = NULL)
+grid.arrange(plot1, plot2)
+plot.both <- rbind(ggplotGrob(plot1),
+                   ggplotGrob(plot2))
+
+grid::grid.newpage()
+grid::grid.draw(plot.both)
+both.1812.plot <- rbind(ggplotGrob(march.1812.plot),
+                        ggplotGrob(temps.1812.plot))
+
+grid::grid.newpage()
+grid::grid.draw(both.1812.plot)
+# Identify which layout elements are panels
+panels <- both.1812.plot$layout$t[grep("panel", both.1812.plot$layout$name)]
+
+# Normally we can pass a vector of null units that represent relative heights.
+# For instance, `unit(c(3, 1), "null")` would make the top panel 3 times as
+# tall as the bottom.
+
+# But, the map here uses coord_equal() to show the correct dimensions of the
+# map, and this messes with the panel height for whatever reason. So instead,
+# we extract the original map panel height, which is really small, and then
+# make the bottom panel smaller in the same scale.
+map.panel.height <- both.1812.plot$heights[panels][1]
+
+# See, super small
+map.panel.height
+# Apply new panel heights to object
+both.1812.plot$heights[panels] <- unit(c(map.panel.height, 0.1), "null")
+
+grid::grid.newpage()
+grid::grid.draw(both.1812.plot)
+
+```
+```{r Q5 updated}
+#install.packages("pander")
+#install.packages("ggmap")
+library(tidyverse)
+library(lubridate)
+library(ggmap)
+library(ggrepel)
+library(gridExtra)
+library(pander)
+library(here)
+napoleon_data <- readRDS(here("data", "napoleon.rds"))
+print(napoleon_data)
+cities <- napoleon_data$cities
+troops <- napoleon_data$troops
+temps <- napoleon_data$temperatures
+if (is.character(temps$date)) {
+  temps <- temps %>% mutate(date = dmy(date))
+}
+troops %>% head() %>% pandoc.table(style = "rmarkdown")
+ggplot(troops, aes(x = long, y = lat, group = group)) +
+  geom_path()
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path()
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round")
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round") +
+  scale_size(range = c(0.5, 15))
+ggplot(troops, aes(x = long, y = lat, group = group, 
+                   color = direction, size = survivors)) +
+  geom_path(lineend = "round") +
+  scale_size(range = c(0.5, 15)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+ggplot() +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat)) +
+  geom_text(data = cities, aes(x = long, y = lat, label = city), vjust = 1.5) +
+  scale_size(range = c(0.5, 15)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+ggplot() +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat),
+             color = "#DC5B44") +
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = city),
+                  color = "#DC5B44", size = 3,
+                  nudge_x = 0.5, nudge_y = 0.5) +
+  scale_size(range = c(0.5, 15)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+# No map this time
+march.1812.plot.simple <- ggplot() +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat),
+             color = "#DC5B44") +
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = city),
+                  color = "#DC5B44") +
+  scale_size(range = c(0.5, 10)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  guides(color = FALSE, size = FALSE) +
+  theme_nothing()
+
+# Change the x-axis limits to match the simple map
+temps.1812.plot <- ggplot(data = temps.nice, aes(x = long, y = temp)) +
+  geom_line() +
+  geom_label(aes(label = nice.label), size = 2.5) + 
+  labs(x = NULL, y = "° Celsius") +
+  scale_x_continuous(limits = ggplot_build(march.1812.plot.simple)$layout$panel_ranges[[1]]$x.range) +
+  scale_y_continuous(position = "right") +
+  coord_cartesian(ylim = c(-35, 5)) +  # Add some space above/below
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_blank(), axis.ticks = element_blank(),
+        panel.border = element_blank())
+
+# Combine the two plots
+both.1812.plot.simple <- rbind(ggplotGrob(march.1812.plot.simple),
+                               ggplotGrob(temps.1812.plot))
+
+# Adjust panels
+panels <- both.1812.plot.simple$layout$t[grep("panel", both.1812.plot.simple$layout$name)]
+
+# Because this plot doesn't use coord_equal, since it's not a map, we can use whatever relative numbers we want, like a 3:1 ratio
+both.1812.plot.simple$heights[panels] <- unit(c(3, 1), "null")
+
+grid::grid.newpage()
+grid::grid.draw(both.1812.plot.simple)
+```
+
+
+
 The series of ggplot commands create various plots that show the path of Napoleon's troops, indicated by longitude and latitude. The plots evolve from simple path charts to more detailed versions, adding attributes like troop direction and number of survivors as colors and sizes. The visualizations also include customization in color schemes, line styles, and the removal of default labels and guides. Ultimately, the final plot combines troop movements with city locations, labeled with city names, providing a comprehensive view of the campaign.
 
 Citations: Q5: The code was referenced from https://github.com/andrewheiss/fancy-minard.git
