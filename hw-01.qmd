@@ -435,7 +435,7 @@ main_plot <- ggplot() +
 
  
 
-```
+```{r Q5 updated}
 ggplot(data = temps, aes(x = long, y = temp)) +
   geom_line() +
   geom_text(aes(label = temp), vjust = 1.5)
@@ -479,7 +479,7 @@ both.1812.plot <- rbind(ggplotGrob(march.1812.plot),
 grid::grid.newpage()
 grid::grid.draw(both.1812.plot)
 # Identify which layout elements are panels
-panels <- both.1812.plot$layout$t[grep("panel", both.1812.plot$layout$name)]
+#panels <- both.1812.plot$layout$t[grep("panel", both.1812.plot$layout$name)]
 
 # Normally we can pass a vector of null units that represent relative heights.
 # For instance, `unit(c(3, 1), "null")` would make the top panel 3 times as
@@ -492,15 +492,15 @@ panels <- both.1812.plot$layout$t[grep("panel", both.1812.plot$layout$name)]
 map.panel.height <- both.1812.plot$heights[panels][1]
 
 # See, super small
-map.panel.height
+#map.panel.height
 # Apply new panel heights to object
-both.1812.plot$heights[panels] <- unit(c(map.panel.height, 0.1), "null")
+#both.1812.plot$heights[panels] <- unit(c(map.panel.height, 0.1), "null")
 
-grid::grid.newpage()
-grid::grid.draw(both.1812.plot)
+#grid::grid.newpage()
+#grid::grid.draw(both.1812.plot)
 
 ```
-```{r Q5 updated}
+```{r Q5 more updated}
 #install.packages("pander")
 #install.packages("ggmap")
 library(tidyverse)
