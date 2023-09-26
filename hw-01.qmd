@@ -467,6 +467,43 @@ ggplot() +
  
 
 ```{r Q5 updated}
+march.1812.europe <- c(left = -13.10, bottom = 35.75, right = 41.04, top = 61.86)
+
+# "zoom" ranges from 3 (continent) to 21 (building)
+# "where" is a path to a folder where the downloaded tiles are cached
+march.1812.europe.map <- get_stamenmap(bbox = march.1812.europe, zoom = 5,
+                                       maptype = "terrain", where = "cache")
+ggmap(march.1812.europe.map)
+march.1812.europe.map.wc <- get_stamenmap(bbox = march.1812.europe, zoom = 5,
+                                          maptype = "watercolor", where = "cache")
+ggmap(march.1812.europe.map.wc)
+ggmap(march.1812.europe.map.wc) +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  scale_size(range = c(0.5, 5)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  guides(color = FALSE, size = FALSE) +
+  theme_nothing()  # This is a special theme that comes with ggmap
+march.1812.ne.europe <- c(left = 23.5, bottom = 53.4, right = 38.1, top = 56.3)
+
+march.1812.ne.europe.map <- get_stamenmap(bbox = march.1812.ne.europe, zoom = 8,
+                                          maptype = "terrain-background", where = "cache")
+
+march.1812.plot <- ggmap(march.1812.ne.europe.map) +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat),
+             color = "#DC5B44") +
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = city),
+                  color = "#DC5B44") +
+  scale_size(range = c(0.5, 10)) + 
+  scale_colour_manual(values = c("#DFC17E", "#252523")) +
+  guides(color = FALSE, size = FALSE) +
+  theme_nothing()
+
+march.1812.plot
 ggplot(data = temps, aes(x = long, y = temp)) +
   geom_line() +
   geom_text(aes(label = temp), vjust = 1.5)
