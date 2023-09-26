@@ -239,7 +239,7 @@ print(plot_H)
 ```
 ```{r 3c updated}
 
-install.packages("gridExtra")
+#install.packages("gridExtra")
 library(gridExtra)
 # Common mapping for all plots
 com_mapping <- ggplot(county, aes(x = homeownership, y = poverty)) 
