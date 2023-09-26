@@ -395,7 +395,7 @@ napoleon_data <- readRDS(here("data", "napoleon.rds"))
 print(napoleon_data)
 cities <- napoleon_data$cities
 troops <- napoleon_data$troops
-temps <- napoleon_data$temps
+temps <- napoleon_data$temperatures
 if (is.character(temps$date)) {
   temps <- temps %>% mutate(date = dmy(date))
 }
@@ -429,111 +429,12 @@ main_plot <- ggplot() +
   scale_colour_manual(values = c("#DFC17E", "#252523")) +
   labs(x = NULL, y = NULL) + 
   guides(color = FALSE, size = FALSE)
-
-
-```
-
- 
-
-```{r Q5 updated}
-ggplot(data = temps, aes(x = long, y = temp)) +
-  geom_line() +
-  geom_text(aes(label = temp), vjust = 1.5)
-ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range
-temps.nice <- temps %>%
-  mutate(nice.label = paste0(temp, "°, ", month, ". ", day))
-
-temps.1812.plot <- ggplot(data = temps.nice, aes(x = long, y = temp)) +
-  geom_line() +
-  geom_label(aes(label = nice.label), size = 2.5) + 
-  labs(x = NULL, y = "° Celsius") +
-  scale_x_continuous(limits = ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range) +
-  scale_y_continuous(position = "right") +
-  coord_cartesian(ylim = c(-35, 5)) +  # Add some space above/below
-  theme_bw() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        axis.text.x = element_blank(), axis.ticks = element_blank(),
-        panel.border = element_blank())
-
-temps.1812.plot
-example.data <- data_frame(x = 1:10, y = rnorm(10))
-
-plot1 <- ggplot(example.data, aes(x = x, y = y)) +
-  geom_line() +
-  labs(y = "This is a really\nreally really really\nreally tall label")
-
-plot2 <- ggplot(example.data, aes(x = x, y = y)) +
-  geom_line() +
-  labs(y = NULL)
-grid.arrange(plot1, plot2)
-plot.both <- rbind(ggplotGrob(plot1),
-                   ggplotGrob(plot2))
-
-grid::grid.newpage()
-grid::grid.draw(plot.both)
-both.1812.plot <- rbind(ggplotGrob(march.1812.plot),
-                        ggplotGrob(temps.1812.plot))
-
-grid::grid.newpage()
-grid::grid.draw(both.1812.plot)
-# Identify which layout elements are panels
-#panels <- both.1812.plot$layout$t[grep("panel", both.1812.plot$layout$name)]
-
-# Normally we can pass a vector of null units that represent relative heights.
-# For instance, `unit(c(3, 1), "null")` would make the top panel 3 times as
-# tall as the bottom.
-
-# But, the map here uses coord_equal() to show the correct dimensions of the
-# map, and this messes with the panel height for whatever reason. So instead,
-# we extract the original map panel height, which is really small, and then
-# make the bottom panel smaller in the same scale.
-map.panel.height <- both.1812.plot$heights[panels][1]
-
-# See, super small
-#map.panel.height
-# Apply new panel heights to object
-#both.1812.plot$heights[panels] <- unit(c(map.panel.height, 0.1), "null")
-
-#grid::grid.newpage()
-#grid::grid.draw(both.1812.plot)
-
-```
-```{r Q5 more updated}
-#install.packages("pander")
-#install.packages("ggmap")
-library(tidyverse)
-library(lubridate)
-library(ggmap)
-library(ggrepel)
-library(gridExtra)
-library(pander)
-library(here)
-napoleon_data <- readRDS(here("data", "napoleon.rds"))
-print(napoleon_data)
-cities <- napoleon_data$cities
-troops <- napoleon_data$troops
-temps <- napoleon_data$temperatures
-if (is.character(temps$date)) {
-  temps <- temps %>% mutate(date = dmy(date))
-}
-troops %>% head() %>% pandoc.table(style = "rmarkdown")
-ggplot(troops, aes(x = long, y = lat, group = group)) +
-  geom_path()
-ggplot(troops, aes(x = long, y = lat, group = group, 
-                   color = direction, size = survivors)) +
-  geom_path()
-ggplot(troops, aes(x = long, y = lat, group = group, 
-                   color = direction, size = survivors)) +
-  geom_path(lineend = "round")
-ggplot(troops, aes(x = long, y = lat, group = group, 
-                   color = direction, size = survivors)) +
-  geom_path(lineend = "round") +
-  scale_size(range = c(0.5, 15))
-ggplot(troops, aes(x = long, y = lat, group = group, 
-                   color = direction, size = survivors)) +
-  geom_path(lineend = "round") +
+ggplot() +
+  geom_path(data = troops, aes(x = long, y = lat, group = group, 
+                               color = direction, size = survivors),
+            lineend = "round") +
+  geom_point(data = cities, aes(x = long, y = lat)) +
+  geom_text(data = cities, aes(x = long, y = lat, label = city), vjust = 1.5) +
   scale_size(range = c(0.5, 15)) + 
   scale_colour_manual(values = c("#DFC17E", "#252523")) +
   labs(x = NULL, y = NULL) + 
@@ -555,12 +456,54 @@ ggplot() +
   geom_point(data = cities, aes(x = long, y = lat),
              color = "#DC5B44") +
   geom_text_repel(data = cities, aes(x = long, y = lat, label = city),
-                  color = "#DC5B44", size = 3,
-                  nudge_x = 0.5, nudge_y = 0.5) +
+                  color = "#DC5B44") +
   scale_size(range = c(0.5, 15)) + 
   scale_colour_manual(values = c("#DFC17E", "#252523")) +
   labs(x = NULL, y = NULL) + 
   guides(color = FALSE, size = FALSE)
+
+```
+
+ 
+
+```{r Q5 updated}
+ggplot(data = temps, aes(x = long, y = temp)) +
+  geom_line() +
+  geom_text(aes(label = temp), vjust = 1.5)
+ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range
+temps.nice <- temps %>%
+  mutate(nice.label = paste0(temp, "°, ", month, ". ", day))
+
+temps.1812.plot <- ggplot(data = temps.nice, aes(x = long, y = temp)) +
+  geom_line() +
+  geom_label(aes(label = nice.label), size = 2.5) + 
+  labs(x = NULL, y = "° Celsius") +
+  scale_x_continuous(limits = ggplot_build(march.1812.plot)$layout$panel_ranges[[1]]$x.range) +
+  scale_y_continuous(position = "right") +
+  coord_cartesian(ylim = c(-35, 5)) +  # Add some space above/below
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_blank(), axis.ticks = element_blank(),
+        panel.border = element_blank())
+
+temps.1812.plot
+example.data <- data_frame(x = 1:10, y = rnorm(10))
+
+plot1 <- ggplot(example.data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(y = "This is a really\nreally really really\nreally tall label")
+
+plot2 <- ggplot(example.data, aes(x = x, y = y)) +
+  geom_line() +
+  labs(y = NULL)
+
+grid.arrange(plot1, plot2)
+plot.both <- rbind(ggplotGrob(plot1),
+                   ggplotGrob(plot2))
+
+grid::grid.newpage()
+grid::grid.draw(plot.both)
 # No map this time
 march.1812.plot.simple <- ggplot() +
   geom_path(data = troops, aes(x = long, y = lat, group = group, 
@@ -583,7 +526,6 @@ temps.1812.plot <- ggplot(data = temps.nice, aes(x = long, y = temp)) +
   scale_x_continuous(limits = ggplot_build(march.1812.plot.simple)$layout$panel_ranges[[1]]$x.range) +
   scale_y_continuous(position = "right") +
   coord_cartesian(ylim = c(-35, 5)) +  # Add some space above/below
-  theme_bw() +
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank(),
